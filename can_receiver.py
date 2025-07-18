@@ -1,18 +1,22 @@
 import cantools
 import can
 import threading
+import os
 
 # Load DBC
-db = cantools.database.load_file("/root/Steering-Wheel-LART/CAN_DBC/DataDBC.dbc")
+script_dir = os.path.dirname(os.path.abspath(__file__))
+dbc_path = os.path.join(script_dir, "CAN_DBC", "DataDBC.dbc")
+db = cantools.database.load_file(dbc_path)
 
 # CAN interface setup
-can_interface = 'can0'
-bus = can.interface.Bus(can_interface, interface='socketcan')
+can_interface = "can0"
+bus = can.interface.Bus(can_interface, interface="socketcan")
 
 # Shared global data
-signal_values = {}      # signal_name -> value
-message_signals = {}    # frame_id -> {name, signals}
+signal_values = {}  # signal_name -> value
+message_signals = {}  # frame_id -> {name, signals}
 watched_ids = [0x20, 0x21, 0x22, 0x23, 0x24, 0x60]
+
 
 class CANSignalReceiver:
     def __init__(self):
@@ -37,11 +41,12 @@ class CANSignalReceiver:
 
             message_signals[msg.arbitration_id] = {
                 "name": decoded_msg.name,
-                "signals": decoded_signals
+                "signals": decoded_signals,
             }
 
         except Exception as e:
             print(f"Decode error for ID {hex(msg.arbitration_id)}: {e}")
+
 
 def send_message(message_name, signal_data):
     try:
@@ -49,9 +54,7 @@ def send_message(message_name, signal_data):
         data = msg.encode(signal_data)
 
         can_msg = can.Message(
-            arbitration_id=msg.frame_id,
-            data=data,
-            is_extended_id=msg.is_extended_frame
+            arbitration_id=msg.frame_id, data=data, is_extended_id=msg.is_extended_frame
         )
 
         bus.send(can_msg)
