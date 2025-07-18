@@ -3,7 +3,7 @@ import can
 import threading
 
 # Load DBC
-db = cantools.database.load_file("/root/Steering-Wheel-LART/DataDBC.dbc")
+db = cantools.database.load_file("/root/Steering-Wheel-LART/CAN_DBC/DataDBC.dbc")
 
 # CAN interface setup
 can_interface = 'can0'

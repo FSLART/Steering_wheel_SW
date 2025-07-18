@@ -1,3 +1,6 @@
 [submodule "Can-Header-Map"]
 	path = Can-Header-Map
 	url = https://github.com/FSLART/Can-Header-Map.git
+[submodule "CAN_DBC"]
+	path = CAN_DBC
+	url = https://github.com/FSLART/CAN_DBC.git
