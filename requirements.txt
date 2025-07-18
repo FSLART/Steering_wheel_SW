@@ -1,0 +1,9 @@
+can==0.0.0
+certifi==2024.8.30
+charset-normalizer==3.3.2
+customtkinter==5.2.2
+cxxheaderparser==1.4.1
+darkdetect==0.8.0
+idna==3.10
+packaging==24.1
+urllib3==2.2.3
