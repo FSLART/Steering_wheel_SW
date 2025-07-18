@@ -7,19 +7,6 @@ import os
 script_dir = os.path.dirname(os.path.abspath(__file__))
 dbc_path = os.path.join(script_dir, "CAN_DBC", "DataDBC.dbc")
 
-# Check if DBC file exists and provide helpful error message
-if not os.path.exists(dbc_path):
-    print(f"Error: DBC file not found at: {dbc_path}")
-    print(f"Script directory: {script_dir}")
-    print(f"Current working directory: {os.getcwd()}")
-    print(
-        "Make sure you're running this script from the correct directory or check the DBC file path."
-    )
-    raise FileNotFoundError(f"DBC file not found: {dbc_path}")
-
-db = cantools.database.load_file(dbc_path)
-print(f"Successfully loaded DBC file from: {dbc_path}")
-
 # CAN interface setup
 can_interface = "can0"
 bus = can.interface.Bus(can_interface, interface="socketcan")
