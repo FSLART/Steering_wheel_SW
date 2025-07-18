@@ -6,6 +6,7 @@ import os
 # Load DBC
 script_dir = os.path.dirname(os.path.abspath(__file__))
 dbc_path = os.path.join(script_dir, "CAN_DBC", "DataDBC.dbc")
+db = cantools.database.load_file(dbc_path)
 
 # CAN interface setup
 can_interface = "can0"
