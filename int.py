@@ -267,7 +267,7 @@ def update_data():
     speed_label.configure(text=str(speed))  # Update the speed display
     data_label_1.configure(text=str(data_1 / 10))  # Update Temp 1
     data_label_2.configure(text=str(data_2 / 10))  # Update Temp COLD
-    data_label_3.configure(text=str(data_3 / 10))  # Update Temp 3
+    data_label_3.configure(text=str(data_3))  # Update Temp 3
     data_label_4.configure(text=str(data_4))  # Update Kw Inst.
     data_label_5.configure(text=str(data_5))  # Update Kw Limit
     soc_HV_bar.set(soc_hv_level)  # Update SoC LV progress bar
