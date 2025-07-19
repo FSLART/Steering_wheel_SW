@@ -12,8 +12,8 @@ from can_receiver import (
 )
 from rotary import RotarySwitch
 
-rotary = RotarySwitch()
-rotary.start()
+# rotary = RotarySwitch()
+# rotary.start()
 
 ctk.set_appearance_mode("dark")  # or "dark"
 ctk.set_default_color_theme(
@@ -297,24 +297,24 @@ def update_data():
     if soc_hv_level >= 0.2:
         low_soc_hv_alert_shown = False
 
-    try:
-        index = rotary.get_index()
-        if index is not None:
-            if index == 0:
-                rotory = 1
-            elif index == 1:
-                rotory = 0
-            elif index == 2:
-                rotory = 1
-            elif index == 3:
-                rotory = 0
-            elif index == 4:
-                rotory = 1
-            elif index == 5:
-                rotory = 0
-    except KeyboardInterrupt:
-        print("Stopping...")
-        rotary.stop()
+    # try:
+    #   # index = rotary.get_index()
+    #    if index is not None:
+    #        if index == 0:
+    #            rotory = 1
+    #        elif index == 1:
+    #            rotory = 0
+    #        elif index == 2:
+    #            rotory = 1
+    #        elif index == 3:
+    #            rotory = 0
+    #        elif index == 4:
+    #            rotory = 1
+    #        elif index == 5:
+    #            rotory = 0
+    # except KeyboardInterrupt:
+    #    print("Stopping...")
+    #    #rotary.stop()
 
     # Send message VCU_2 with updated LMT1 value
     # send_message(
