@@ -16,6 +16,7 @@ bus = can.interface.Bus(can_interface, interface="socketcan")
 signal_values = {}  # signal_name -> value
 message_signals = {}  # frame_id -> {name, signals}
 watched_ids = [0x20, 0x21, 0x22, 0x23, 0x24, 0x60]
+can_activity = False  # Flag to indicate successful CAN reception
 
 
 class CANSignalReceiver:
@@ -32,6 +33,7 @@ class CANSignalReceiver:
             self.handle_can_message(msg)
 
     def handle_can_message(self, msg):
+        global can_activity
         try:
             decoded_msg = db.get_message_by_frame_id(msg.arbitration_id)
             decoded_signals = decoded_msg.decode(msg.data)
@@ -43,6 +45,8 @@ class CANSignalReceiver:
                 "name": decoded_msg.name,
                 "signals": decoded_signals,
             }
+            
+            can_activity = True  # Set activity flag on successful decode
 
         except Exception as e:
             print(f"Decode error for ID {hex(msg.arbitration_id)}: {e}")

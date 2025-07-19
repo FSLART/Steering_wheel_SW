@@ -9,6 +9,7 @@ from can_receiver import (
     message_signals,
     watched_ids,
     send_message,
+    can_activity,
 )
 from rotary import RotarySwitch
 
@@ -36,6 +37,15 @@ R2D_label = ctk.CTkLabel(
     text_color="purple",
 )
 R2D_label.place(relx=0.5, rely=0.04, anchor="center")
+
+# CAN Activity Indicator
+can_indicator = ctk.CTkLabel(
+    app,
+    text="●",
+    font=("Noto Sans Bold", 30, "bold"),
+    text_color="red",
+)
+can_indicator.place(x=20, y=20)
 
 # Main Frame
 frame = ctk.CTkFrame(app, width=600, height=400)
@@ -245,7 +255,14 @@ def update_data():
     global data_1, data_2, data_3, data_4, data_5, data_6
     global soc_lv_level, soc_hv_level
     global low_soc_lv_alert_shown, low_soc_hv_alert_shown
-    global rotory
+    global rotory, can_activity
+
+    # Update CAN activity indicator
+    if can_activity:
+        can_indicator.configure(text_color="green")
+        can_activity = False  # Reset flag
+    else:
+        can_indicator.configure(text_color="red")
 
     if "RPM" in signal_values:
         speed = signal_values["RPM"]  # Convert RPM to Km
