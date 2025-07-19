@@ -45,7 +45,7 @@ class CANSignalReceiver:
                 "name": decoded_msg.name,
                 "signals": decoded_signals,
             }
-            
+
             can_activity = True  # Set activity flag on successful decode
 
         except Exception as e:
