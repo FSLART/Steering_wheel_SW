@@ -265,21 +265,22 @@ def update_data():
         data_5 = signal_values["LMT1"]  # Update Kw Limit
 
     speed_label.configure(text=str(speed))  # Update the speed display
-    data_label_1.configure(text=str(data_1))  # Update Temp 1
-    data_label_2.configure(text=str(data_2))  # Update Temp COLD
-    data_label_3.configure(text=str(data_3))  # Update Temp 3
+    data_label_1.configure(text=str(data_1 / 10))  # Update Temp 1
+    data_label_2.configure(text=str(data_2 / 10))  # Update Temp COLD
+    data_label_3.configure(text=str(data_3 / 10))  # Update Temp 3
     data_label_4.configure(text=str(data_4))  # Update Kw Inst.
     data_label_5.configure(text=str(data_5))  # Update Kw Limit
     soc_HV_bar.set(soc_hv_level)  # Update SoC LV progress bar
     soc_LV_bar.set(soc_lv_level)  # Update SoC LV progress bar
+
     if soc_hv_level != "ERR":
         soc_HV_per.configure(
-            text=str(int(soc_hv_level * 100)) + "%"
+            text=str(int(soc_hv_level)) + "%"
         )  # Update SoC LV percentage
         soc_HV_bar.set(soc_hv_level)  # Update SoC HV progress bar
     if soc_lv_level != "ERR":
         soc_LV_per.configure(
-            text=str(int(soc_lv_level * 100)) + "%"
+            text=str(int(soc_lv_level)) + "%"
         )  # Update SoC HV percentage
         soc_LV_bar.set(soc_lv_level)  # Update SoC HV progress bar
     # Check LV SoC
@@ -316,17 +317,17 @@ def update_data():
         rotary.stop()
 
     # Send message VCU_2 with updated LMT1 value
-    send_message(
-        "VCU_2",
-        {
-            "INV_Faults": 0,
-            "LMT1": rotory,
-            "LMT2": 0,
-            "VCU_State": 1,
-            "APPS_Error": 0,
-            "Power_Plan": 2,
-        },
-    )
+    # send_message(
+    #    "VCU_2",
+    #    {
+    #        "INV_Faults": 0,
+    #        "LMT1": rotory,
+    #        "LMT2": 0,
+    #        "VCU_State": 1,
+    #        "APPS_Error": 0,
+    #        "Power_Plan": 2,
+    #    },
+    # )
 
     frame.after(50, update_data)  # Schedule the function to be called again after 5 ms
 
