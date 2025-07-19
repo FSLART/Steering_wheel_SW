@@ -45,7 +45,7 @@ can_indicator = ctk.CTkLabel(
     font=("Noto Sans Bold", 30, "bold"),
     text_color="red",
 )
-can_indicator.place(x=10, y=10)
+can_indicator.place(x=5, y=5)
 
 # Main Frame
 frame = ctk.CTkFrame(app, width=600, height=400)
@@ -70,6 +70,7 @@ data_7 = 4
 low_soc_lv_alert_shown = False
 low_soc_hv_alert_shown = False
 can_blink_state = False  # For blinking effect
+last_can_activity = 0  # Track last CAN activity timestamp
 
 # Rectangle 1 - DATA XXXXXX
 rect_1 = ctk.CTkFrame(
@@ -256,19 +257,25 @@ def update_data():
     global data_1, data_2, data_3, data_4, data_5, data_6
     global soc_lv_level, soc_hv_level
     global low_soc_lv_alert_shown, low_soc_hv_alert_shown
-    global rotory, can_activity, can_blink_state
+    global rotory, can_activity, can_blink_state, last_can_activity
 
-    # Update CAN activity indicator with blinking effect
+    current_time = time.time()
+
+    # Enhanced CAN activity monitoring with timeout detection
     if can_activity:
-        # Toggle between green and bright green for blinking when active
+        last_can_activity = current_time
+        # Toggle between green and lime for blinking when active
         can_blink_state = not can_blink_state
         if can_blink_state:
             can_indicator.configure(text_color="lime")  # Bright green
         else:
             can_indicator.configure(text_color="green")  # Normal green
         can_activity = False  # Reset flag
+    elif current_time - last_can_activity > 2.0:  # No activity for 2+ seconds
+        # Orange for connection timeout
+        can_indicator.configure(text_color="orange")
     else:
-        # Red when no activity
+        # Red when no recent activity (but within timeout)
         can_indicator.configure(text_color="red")
 
     if "RPM" in signal_values:

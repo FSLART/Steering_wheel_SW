@@ -47,7 +47,9 @@ class CANSignalReceiver:
             }
 
             can_activity = True  # Set activity flag on successful decode
-
+            print(
+                f"Received {decoded_msg.name} (0x{msg.arbitration_id:X}): {decoded_signals}"
+            )
         except Exception as e:
             print(f"Decode error for ID {hex(msg.arbitration_id)}: {e}")
 
