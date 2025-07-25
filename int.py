@@ -294,6 +294,12 @@ def update_data():
         soc_lv_level = signal_values["LV_SOC"]  # Update SoC LV level
     if "SOC_HV" in signal_values:
         soc_hv_level = signal_values["SOC_HV"]  # Update SoC HV level
+    if "R2D" in signal_values:
+        r2d_state = signal_values["R2D"]
+        if r2d_state == 1:
+            R2D_label.configure(text="READY TO DRIVE", text_color="green")
+        else:
+            R2D_label.configure(text="NOT READY", text_color="red")
     if "INV_Temperature" in signal_values:
         data_1 = signal_values["INV_Temperature"]  # Update Temp 1
     if "Motor_Temperature" in signal_values:
