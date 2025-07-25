@@ -61,28 +61,29 @@ def get_rpm_color(rpm_normalized):
 # RPM Bar
 rpm_bar = ctk.CTkProgressBar(
     app,
-    width=600,
-    height=15,
-    corner_radius=2,
+    width=700,
+    height=25,
+    corner_radius=5,
     progress_color="green",  # Start with green
-    border_width=1,
+    border_width=2,
 )
-rpm_bar.place(relx=0.5, rely=0.1, anchor="center")
+rpm_bar.place(relx=0.5, rely=0.15, anchor="center")
 rpm_bar.set(0)  # Initialize at 0
 
+# RPM Labels with larger font
 rpm_min_label = ctk.CTkLabel(
     app,
     text="0",
-    font=("Noto Sans Bold", 12),
+    font=("Noto Sans Bold", 16, "bold"),
 )
-rpm_min_label.place(relx=0.12, rely=0.1, anchor="center")
+rpm_min_label.place(relx=0.08, rely=0.15, anchor="center")
 
 rpm_max_label = ctk.CTkLabel(
     app,
     text="6500",
-    font=("Noto Sans Bold", 12),
+    font=("Noto Sans Bold", 16, "bold"),
 )
-rpm_max_label.place(relx=0.88, rely=0.1, anchor="center")
+rpm_max_label.place(relx=0.92, rely=0.15, anchor="center")
 
 # CAN Activity Indicator
 can_indicator = ctk.CTkLabel(
