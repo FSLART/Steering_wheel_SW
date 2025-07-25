@@ -34,7 +34,7 @@ rpm_bar = ctk.CTkProgressBar(
     app,
     orientation="horizontal",
     width=700,
-    height=30,
+    height=50,
     corner_radius=10,
     progress_color="red",
 )
@@ -52,52 +52,6 @@ R2D_label.place(relx=0.5, rely=0.96, anchor="center")
 
 
 # Function to get color based on RPM value
-def get_rpm_color(rpm_normalized):
-    # Convert from 0-1 to 0-100 for easier calculation
-    percentage = rpm_normalized * 100
-    if percentage < 50:  # First half - green to yellow
-        # Calculate ratio between green and yellow
-        ratio = percentage / 50
-        r = ratio * 255  # Red increases
-        g = 255  # Green stays full
-        b = 0  # Blue stays zero
-    else:  # Second half - yellow to red
-        # Calculate ratio between yellow and red
-        ratio = (percentage - 50) / 50
-        r = 255  # Red stays full
-        g = 255 * (1 - ratio)  # Green decreases
-        b = 0  # Blue stays zero
-    return f"#{int(r):02x}{int(g):02x}{int(b):02x}"
-
-
-# RPM Bar
-rpm_bar = ctk.CTkProgressBar(
-    app,
-    width=700,
-    height=25,
-    corner_radius=5,
-    progress_color="green",  # Start with green
-    border_width=2,
-)
-rpm_bar.place(relx=0.5, rely=0.15, anchor="center")
-rpm_bar.set(0)  # Initialize at 0
-
-# RPM Labels with larger font
-rpm_min_label = ctk.CTkLabel(
-    app,
-    text="0",
-    font=("Noto Sans Bold", 16, "bold"),
-)
-rpm_min_label.place(relx=0.08, rely=0.15, anchor="center")
-
-rpm_max_label = ctk.CTkLabel(
-    app,
-    text="6500",
-    font=("Noto Sans Bold", 16, "bold"),
-)
-rpm_max_label.place(relx=0.92, rely=0.15, anchor="center")
-
-# CAN Activity Indicator
 can_indicator = ctk.CTkLabel(
     app,
     text="●",
