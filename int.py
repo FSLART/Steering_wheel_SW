@@ -128,7 +128,12 @@ soc_LV_bar_label = ctk.CTkLabel(
 )  # Create top label for the bar
 soc_LV_bar_label.place(x=50, y=50, anchor="center")  # Center the label with the bar
 soc_LV_bar = ctk.CTkProgressBar(
-    app, orientation="vertical", width=60, height=320, corner_radius=4
+    app,
+    orientation="vertical",
+    width=60,
+    height=320,
+    corner_radius=4,
+    progress_color="yellow",
 )  # Create the bar
 soc_LV_bar.place(x=20, y=80)  # Position the bar
 soc_LV_bar.set(soc_lv_level / 100)  # Set the bar level based on SoC value (0-1 scale)
@@ -140,7 +145,12 @@ soc_LV_per.place(x=50, y=430, anchor="center")  # Position the label inside the 
 soc_HV_bar_label = ctk.CTkLabel(app, text="HV", font=("Noto Sans Bold ", 35, "bold"))
 soc_HV_bar_label.place(x=750, y=50, anchor="center")  # Center the label with the bar
 soc_HV_bar = ctk.CTkProgressBar(
-    app, orientation="vertical", width=60, height=320, corner_radius=4
+    app,
+    orientation="vertical",
+    width=60,
+    height=320,
+    corner_radius=4,
+    progress_color="yellow",
 )
 soc_HV_bar.place(x=723, y=80)
 soc_HV_bar.set(soc_hv_level / 100)  # Set the bar level based on SoC value (0-1 scale)
