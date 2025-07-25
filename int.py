@@ -29,17 +29,19 @@ app.geometry("800x480")
 app.title("Dashboard")
 app.attributes("-fullscreen", True)  # Set to fullscreen mode
 app.configure(cursor="none")
-# RPM Bar at the top
-rpm_bar = ctk.CTkProgressBar(
-    app,
-    orientation="horizontal",
-    width=700,
-    height=50,
-    corner_radius=10,
-    progress_color="red",
-)
-rpm_bar.place(relx=0.5, y=10, anchor="center")
-rpm_bar.set(0)  # Initial RPM value
+
+# RPM Shift Lights - 12 circles
+shift_lights = []
+for i in range(12):
+    x_pos = 100 + (i * 50)  # Space circles 50 pixels apart, starting at x=100
+    circle = ctk.CTkLabel(
+        app,
+        text="●",
+        font=("Noto Sans Bold", 40, "bold"),
+        text_color="gray30",  # Default off color
+    )
+    circle.place(x=x_pos, y=15, anchor="center")
+    shift_lights.append(circle)
 
 # R2D WARNING - moved to bottom
 R2D_label = ctk.CTkLabel(
@@ -303,21 +305,30 @@ def update_data():
 
     if "RPM" in signal_values:
         speed = signal_values["RPM"]  # Convert RPM to Km
-        # Update RPM bar (max RPM is 6500, min is 0)
+        # Update RPM shift lights (max RPM is 6500, min is 0)
         rpm_value = signal_values["RPM"]
         if rpm_value != "ERR" and isinstance(rpm_value, (int, float)):
-            rpm_percentage = min(rpm_value / 6500, 1.0)  # Scale to 0-1, max at 6500 RPM
-            rpm_bar.set(rpm_percentage)
+            # Calculate how many lights should be on (0-12)
+            lights_on = int((rpm_value / 6500) * 12)
+            lights_on = min(lights_on, 12)  # Cap at 12 lights
 
-            # Change bar color based on RPM level
-            if rpm_value < 2000:
-                rpm_bar.configure(progress_color="green")
-            elif rpm_value < 4000:
-                rpm_bar.configure(progress_color="yellow")
-            else:
-                rpm_bar.configure(progress_color="red")
+            # Update each shift light
+            for i, light in enumerate(shift_lights):
+                if i < lights_on:
+                    # Determine color based on position
+                    if i < 4:  # First 4 lights - green
+                        light.configure(text_color="green")
+                    elif i < 8:  # Next 4 lights - yellow
+                        light.configure(text_color="yellow")
+                    else:  # Last 4 lights - red
+                        light.configure(text_color="red")
+                else:
+                    # Light is off
+                    light.configure(text_color="gray30")
         else:
-            rpm_bar.set(0)
+            # Turn off all lights when RPM is error
+            for light in shift_lights:
+                light.configure(text_color="gray30")
     if "LV_SOC" in signal_values:
         soc_lv_level = signal_values["LV_SOC"]  # Update SoC LV level
     if "SOC_HV" in signal_values:
