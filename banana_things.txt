@@ -1,0 +1,28 @@
+x = subrede do telemovel
+
+sudo ssh 192.168.x.164
+ip a
+
+user root
+pass root
+
+sudo ip link set can0 type can bitrate 1000000
+sudo ip link set up can0
+
+git pull origin main
+
+git submodule update
+
+git pull
+
+Caso o sistema já tenha sido configurado previamente, basta seguir os passos abaixo para iniciar o ambiente:
+
+Ativar o ambiente virtual Python:
+
+source ~/Steering-Wheel-LART/venv/bin/activate
+Navegar para o diretório do projeto:
+
+cd ~/Steering-Wheel-LART
+Iniciar a interface gráfica:
+
+startx

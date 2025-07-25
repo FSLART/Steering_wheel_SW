@@ -131,9 +131,9 @@ soc_LV_bar = ctk.CTkProgressBar(
     app, orientation="vertical", width=60, height=320, corner_radius=4
 )  # Create the bar
 soc_LV_bar.place(x=20, y=80)  # Position the bar
-soc_LV_bar.set(soc_lv_level)  # Set the bar level based on SoC value
+soc_LV_bar.set(soc_lv_level / 100)  # Set the bar level based on SoC value (0-1 scale)
 soc_LV_per = ctk.CTkLabel(
-    app, text=str(int(soc_lv_level * 100)) + "%", font=("Noto Sans Bold ", 37, "bold")
+    app, text=str(int(soc_lv_level)) + "%", font=("Noto Sans Bold ", 37, "bold")
 )  # Create Label inside the bar
 soc_LV_per.place(x=50, y=430, anchor="center")  # Position the label inside the bar
 
@@ -143,9 +143,9 @@ soc_HV_bar = ctk.CTkProgressBar(
     app, orientation="vertical", width=60, height=320, corner_radius=4
 )
 soc_HV_bar.place(x=723, y=80)
-soc_HV_bar.set(soc_hv_level)
+soc_HV_bar.set(soc_hv_level / 100)  # Set the bar level based on SoC value (0-1 scale)
 soc_HV_per = ctk.CTkLabel(
-    app, text=str(int(soc_hv_level * 100)) + "%", font=("Noto Sans Bold ", 37, "bold")
+    app, text=str(int(soc_hv_level)) + "%", font=("Noto Sans Bold ", 37, "bold")
 )
 soc_HV_per.place(x=750, y=430, anchor="center")
 
@@ -308,12 +308,12 @@ def update_data():
         soc_HV_per.configure(
             text=str(int(soc_hv_level)) + "%"
         )  # Update SoC LV percentage
-        soc_HV_bar.set(soc_hv_level)  # Update SoC HV progress bar
+        soc_HV_bar.set(soc_hv_level / 100)  # Update SoC HV progress bar (0-1 scale)
     if soc_lv_level != "ERR":
         soc_LV_per.configure(
             text=str(int(soc_lv_level)) + "%"
         )  # Update SoC HV percentage
-        soc_LV_bar.set(soc_lv_level)  # Update SoC HV progress bar
+        soc_LV_bar.set(soc_lv_level / 100)  # Update SoC HV progress bar (0-1 scale)
     # Check LV SoC
     if soc_lv_level < 0.2 and not low_soc_lv_alert_shown:
         # show_error_popup("SoC LV below 20%")
