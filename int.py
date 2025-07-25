@@ -29,14 +29,35 @@ app.geometry("800x480")
 app.title("Dashboard")
 app.attributes("-fullscreen", True)  # Set to fullscreen mode
 app.configure(cursor="none")
-# R2D WARNING
+# RPM Bar at the top
+rpm_bar = ctk.CTkProgressBar(
+    app,
+    orientation="horizontal",
+    width=700,
+    height=20,
+    corner_radius=10,
+    progress_color="red",
+)
+rpm_bar.place(relx=0.5, y=10, anchor="center")
+rpm_bar.set(0)  # Initial RPM value
+
+# RPM Bar Label
+rpm_label = ctk.CTkLabel(
+    app,
+    text="RPM: 0",
+    font=("Noto Sans Bold", 16, "bold"),
+    text_color="white",
+)
+rpm_label.place(relx=0.5, y=35, anchor="center")
+
+# R2D WARNING - moved to bottom
 R2D_label = ctk.CTkLabel(
     app,
     text="R2D STATE UNKNOWN",
     font=("Noto Sans Bold", 30, "bold"),
     text_color="purple",
 )
-R2D_label.place(relx=0.5, rely=0.04, anchor="center")
+R2D_label.place(relx=0.5, rely=0.96, anchor="center")
 
 # CAN Activity Indicator
 can_indicator = ctk.CTkLabel(
@@ -290,6 +311,23 @@ def update_data():
 
     if "RPM" in signal_values:
         speed = signal_values["RPM"]  # Convert RPM to Km
+        # Update RPM bar (max RPM is 6500, min is 0)
+        rpm_value = signal_values["RPM"]
+        if rpm_value != "ERR" and isinstance(rpm_value, (int, float)):
+            rpm_percentage = min(rpm_value / 6500, 1.0)  # Scale to 0-1, max at 6500 RPM
+            rpm_bar.set(rpm_percentage)
+            rpm_label.configure(text=f"RPM: {int(rpm_value)}")
+
+            # Change bar color based on RPM level
+            if rpm_value < 2000:
+                rpm_bar.configure(progress_color="green")
+            elif rpm_value < 4000:
+                rpm_bar.configure(progress_color="yellow")
+            else:
+                rpm_bar.configure(progress_color="red")
+        else:
+            rpm_bar.set(0)
+            rpm_label.configure(text="RPM: ERR")
     if "LV_SOC" in signal_values:
         soc_lv_level = signal_values["LV_SOC"]  # Update SoC LV level
     if "SOC_HV" in signal_values:
