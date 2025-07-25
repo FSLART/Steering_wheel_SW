@@ -38,6 +38,52 @@ R2D_label = ctk.CTkLabel(
 )
 R2D_label.place(relx=0.5, rely=0.04, anchor="center")
 
+
+# Function to get color based on RPM value
+def get_rpm_color(rpm_normalized):
+    # Convert from 0-1 to 0-100 for easier calculation
+    percentage = rpm_normalized * 100
+    if percentage < 50:  # First half - green to yellow
+        # Calculate ratio between green and yellow
+        ratio = percentage / 50
+        r = ratio * 255  # Red increases
+        g = 255  # Green stays full
+        b = 0  # Blue stays zero
+    else:  # Second half - yellow to red
+        # Calculate ratio between yellow and red
+        ratio = (percentage - 50) / 50
+        r = 255  # Red stays full
+        g = 255 * (1 - ratio)  # Green decreases
+        b = 0  # Blue stays zero
+    return f"#{int(r):02x}{int(g):02x}{int(b):02x}"
+
+
+# RPM Bar
+rpm_bar = ctk.CTkProgressBar(
+    app,
+    width=600,
+    height=15,
+    corner_radius=2,
+    progress_color="green",  # Start with green
+    border_width=1,
+)
+rpm_bar.place(relx=0.5, rely=0.1, anchor="center")
+rpm_bar.set(0)  # Initialize at 0
+
+rpm_min_label = ctk.CTkLabel(
+    app,
+    text="0",
+    font=("Noto Sans Bold", 12),
+)
+rpm_min_label.place(relx=0.12, rely=0.1, anchor="center")
+
+rpm_max_label = ctk.CTkLabel(
+    app,
+    text="6500",
+    font=("Noto Sans Bold", 12),
+)
+rpm_max_label.place(relx=0.88, rely=0.1, anchor="center")
+
 # CAN Activity Indicator
 can_indicator = ctk.CTkLabel(
     app,
@@ -290,6 +336,11 @@ def update_data():
 
     if "RPM" in signal_values:
         speed = signal_values["RPM"]  # Convert RPM to Km
+        # Calculate normalized RPM value (0-1 range)
+        rpm_normalized = min(1.0, max(0.0, speed / 6500))
+        # Update RPM bar value and color
+        rpm_bar.set(rpm_normalized)
+        rpm_bar.configure(progress_color=get_rpm_color(rpm_normalized))
     if "LV_SOC" in signal_values:
         soc_lv_level = signal_values["LV_SOC"]  # Update SoC LV level
     if "SOC_HV" in signal_values:
