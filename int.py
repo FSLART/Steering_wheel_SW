@@ -34,21 +34,12 @@ rpm_bar = ctk.CTkProgressBar(
     app,
     orientation="horizontal",
     width=700,
-    height=20,
+    height=30,
     corner_radius=10,
     progress_color="red",
 )
 rpm_bar.place(relx=0.5, y=10, anchor="center")
 rpm_bar.set(0)  # Initial RPM value
-
-# RPM Bar Label
-rpm_label = ctk.CTkLabel(
-    app,
-    text="RPM: 0",
-    font=("Noto Sans Bold", 16, "bold"),
-    text_color="white",
-)
-rpm_label.place(relx=0.5, y=35, anchor="center")
 
 # R2D WARNING - moved to bottom
 R2D_label = ctk.CTkLabel(
@@ -363,7 +354,6 @@ def update_data():
         if rpm_value != "ERR" and isinstance(rpm_value, (int, float)):
             rpm_percentage = min(rpm_value / 6500, 1.0)  # Scale to 0-1, max at 6500 RPM
             rpm_bar.set(rpm_percentage)
-            rpm_label.configure(text=f"RPM: {int(rpm_value)}")
 
             # Change bar color based on RPM level
             if rpm_value < 2000:
@@ -374,7 +364,6 @@ def update_data():
                 rpm_bar.configure(progress_color="red")
         else:
             rpm_bar.set(0)
-            rpm_label.configure(text="RPM: ERR")
     if "LV_SOC" in signal_values:
         soc_lv_level = signal_values["LV_SOC"]  # Update SoC LV level
     if "SOC_HV" in signal_values:
