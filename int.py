@@ -153,8 +153,8 @@ soc_LV_bar = ctk.CTkProgressBar(
 soc_LV_bar.place(x=20, y=80)  # Position the bar
 soc_LV_bar.set(soc_lv_level / 100)  # Set the bar level based on SoC value (0-1 scale)
 soc_LV_per = ctk.CTkLabel(
-    app, text=str(int(soc_lv_level)) + "%", font=("Noto Sans Bold ", 37, "bold")
-)  # Create Label inside the bar
+    app, text=str(int(soc_lv_level)) + "%", font=("Noto Sans Bold ", 28, "bold")
+)  # Create Label inside the bar (smaller font for voltage + percentage)
 soc_LV_per.place(x=50, y=430, anchor="center")  # Position the label inside the bar
 
 soc_HV_bar_label = ctk.CTkLabel(app, text="HV", font=("Noto Sans Bold ", 35, "bold"))
@@ -345,6 +345,28 @@ def update_data():
                 light.configure(text_color="gray30")
     if "LV_SOC" in signal_values:
         soc_lv_level = signal_values["LV_SOC"]  # Update SoC LV level
+
+    # Handle LV voltage for voltage-based percentage calculation
+    if "LV_Voltage" in signal_values:
+        lv_voltage = signal_values["LV_Voltage"]
+        # Calculate percentage based on voltage (assuming 12V nominal, 10V min, 14V max)
+        # You can adjust these voltage thresholds based on your system
+        min_voltage = 24.0  # Minimum voltage (0%)
+        max_voltage = 28.8  # Maximum voltage (100%)
+
+        if lv_voltage != "ERR" and isinstance(lv_voltage, (int, float)):
+            # Calculate percentage based on voltage range
+            voltage_percentage = (
+                (lv_voltage - min_voltage) / (max_voltage - min_voltage)
+            ) * 100
+            voltage_percentage = max(
+                0, min(100, voltage_percentage)
+            )  # Clamp between 0-100%
+
+            # Update the LV bar with voltage-based percentage
+            soc_lv_level = voltage_percentage
+        else:
+            lv_voltage = "ERR"
     if "SOC_HV" in signal_values:
         soc_hv_level = signal_values["SOC_HV"]  # Update SoC HV level
     if "R2D" in signal_values:
@@ -379,13 +401,23 @@ def update_data():
     if soc_hv_level != "ERR":
         soc_HV_per.configure(
             text=str(int(soc_hv_level)) + "%"
-        )  # Update SoC LV percentage
-        soc_HV_bar.set(soc_hv_level / 100)  # Update SoC HV progress bar (0-1 scale)
-    if soc_lv_level != "ERR":
-        soc_LV_per.configure(
-            text=str(int(soc_lv_level)) + "%"
         )  # Update SoC HV percentage
-        soc_LV_bar.set(soc_lv_level / 100)  # Update SoC HV progress bar (0-1 scale)
+        soc_HV_bar.set(soc_hv_level / 100)  # Update SoC HV progress bar (0-1 scale)
+
+    if soc_lv_level != "ERR":
+        # Check if we have voltage data to display
+        if "LV_Voltage" in signal_values and signal_values["LV_Voltage"] != "ERR":
+            lv_voltage = signal_values["LV_Voltage"]
+            # Display both voltage and percentage
+            soc_LV_per.configure(
+                text=f"{lv_voltage:.1f}V\n{int(soc_lv_level)}%"
+            )  # Show voltage and percentage
+        else:
+            # Fallback to just percentage if no voltage data
+            soc_LV_per.configure(
+                text=str(int(soc_lv_level)) + "%"
+            )  # Update SoC LV percentage
+        soc_LV_bar.set(soc_lv_level / 100)  # Update SoC LV progress bar (0-1 scale)
     # Check LV SoC
     if soc_lv_level < 0.2 and not low_soc_lv_alert_shown:
         # show_error_popup("SoC LV below 20%")
