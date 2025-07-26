@@ -453,7 +453,7 @@ def update_data():
         # Show funny popup if overflow detected (but not more than once every 5 seconds)
         if overflow_detected and (current_time - last_overflow_time > 5.0):
             last_overflow_time = current_time
-            app.after(0, show_funny_rpm_popup)  # Schedule popup on main thread
+            # app.after(0, show_funny_rpm_popup)  # Schedule popup on main thread
 
         speed = round(
             rpm_value * 0.02454, 1
