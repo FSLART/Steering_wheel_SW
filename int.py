@@ -348,13 +348,16 @@ def update_data():
 
     # Handle LV voltage for voltage-based percentage calculation
     if "LV_Voltage" in signal_values:
-        lv_voltage = signal_values["LV_Voltage"]
-        # Calculate percentage based on voltage (assuming 12V nominal, 10V min, 14V max)
-        # You can adjust these voltage thresholds based on your system
-        min_voltage = 24.0  # Minimum voltage (0%)
-        max_voltage = 28.8  # Maximum voltage (100%)
+        lv_voltage_raw = signal_values["LV_Voltage"]
 
-        if lv_voltage != "ERR" and isinstance(lv_voltage, (int, float)):
+        if lv_voltage_raw != "ERR" and isinstance(lv_voltage_raw, (int, float)):
+            # Apply DBC scaling: multiply by 0.1 to get actual voltage
+            lv_voltage = lv_voltage_raw * 0.1
+
+            # Calculate percentage based on voltage (24V system)
+            min_voltage = 20.0  # Minimum voltage (0%) - adjusted for 24V system
+            max_voltage = 28.8  # Maximum voltage (100%) - fully charged 24V
+
             # Calculate percentage based on voltage range
             voltage_percentage = (
                 (lv_voltage - min_voltage) / (max_voltage - min_voltage)
