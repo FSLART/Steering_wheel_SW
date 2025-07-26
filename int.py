@@ -1,6 +1,8 @@
 import customtkinter as ctk
 import time
 import threading
+import os
+from PIL import Image
 from periphery import GPIO
 from state_tracker import error_flags, heartbeat_timestamps, module_last_state
 from can_receiver import (
@@ -184,6 +186,8 @@ speed_unit.place(relx=0.75, rely=0.60, anchor="center")
 
 debug_window = None
 calibration_window = None
+funny_popup = None
+last_overflow_time = 0  # To prevent spam popups
 
 
 def monitor_gpio_buttons():
@@ -277,12 +281,141 @@ check_speed()
 rotory = 0
 
 
+def show_funny_rpm_popup():
+    """Show a funny popup with image when RPM overflow is detected"""
+    global funny_popup
+
+    # Close existing popup if any
+    if funny_popup is not None and funny_popup.winfo_exists():
+        funny_popup.destroy()
+
+    funny_popup = ctk.CTkToplevel(app)
+    funny_popup.geometry("500x400")
+    funny_popup.title("RPM OVERFLOW DETECTED!")
+    funny_popup.configure(fg_color="red")
+    funny_popup.attributes("-topmost", True)
+
+    # Center the popup on screen
+    funny_popup.geometry("500x400+150+40")
+
+    # Title
+    title_label = ctk.CTkLabel(
+        funny_popup,
+        text="🚨 RPM OVERFLOW! 🚨",
+        font=("Noto Sans Bold", 24, "bold"),
+        text_color="yellow",
+    )
+    title_label.pack(pady=10)
+
+    # Try to load and display image
+    try:
+        # Look for image in a 'funny_images' folder
+        image_path = os.path.join(
+            os.path.dirname(__file__), "funny_images", "rpm_overflow.png"
+        )
+
+        # Alternative paths to try
+        alternative_paths = [
+            "funny_images/rpm_overflow.png",
+            "funny_images/rpm_overflow.jpg",
+            "funny_images/funny.png",
+            "funny_images/ola.jpeg",
+            "images/rpm_overflow.png",
+            "images/funny.png",
+        ]
+
+        image_loaded = False
+        for alt_path in [image_path] + alternative_paths:
+            try:
+                if os.path.exists(alt_path):
+                    # Load and resize image
+                    pil_image = Image.open(alt_path)
+                    # Resize to fit popup (max 300x200)
+                    pil_image.thumbnail((300, 200), Image.Resampling.LANCZOS)
+
+                    # Convert to CTkImage
+                    ctk_image = ctk.CTkImage(
+                        light_image=pil_image, dark_image=pil_image, size=pil_image.size
+                    )
+
+                    # Display image
+                    image_label = ctk.CTkLabel(funny_popup, image=ctk_image, text="")
+                    image_label.pack(pady=10)
+                    image_loaded = True
+                    break
+            except Exception as e:
+                print(f"Failed to load image from {alt_path}: {e}")
+                continue
+
+        if not image_loaded:
+            # Fallback to text if no image found
+            funny_text = """
+🤖 BEEP BOOP! 🤖
+
+RPM SENSOR GONE WILD!
+
+     (╯°□°)╯︵ ┻━┻
+
+🎢 65000 RPM? REALLY? 🎢
+
+🔧 Check your sensor! 🔧
+
+(Put your funny image in:
+ funny_images/rpm_overflow.png)
+            """
+
+            funny_label = ctk.CTkLabel(
+                funny_popup,
+                text=funny_text,
+                font=("Courier New", 12, "bold"),
+                text_color="white",
+                justify="center",
+            )
+            funny_label.pack(pady=10, expand=True)
+
+    except Exception as e:
+        print(f"Error in image loading: {e}")
+        # Fallback text
+        error_text = f"""
+🚨 IMAGE LOAD ERROR! 🚨
+
+{str(e)}
+
+Please check your funny_images folder!
+        """
+        error_label = ctk.CTkLabel(
+            funny_popup,
+            text=error_text,
+            font=("Courier New", 12, "bold"),
+            text_color="white",
+            justify="center",
+        )
+        error_label.pack(pady=10, expand=True)
+
+    # Bottom message
+    bottom_label = ctk.CTkLabel(
+        funny_popup,
+        text="🔧 RPM Sensor needs attention! 🔧",
+        font=("Noto Sans Bold", 16, "bold"),
+        text_color="white",
+    )
+    bottom_label.pack(pady=10)
+
+    # Auto-close after 4 seconds (longer for image viewing)
+    def close_popup():
+        if funny_popup is not None and funny_popup.winfo_exists():
+            funny_popup.destroy()
+
+    funny_popup.after(4000, close_popup)
+
+
 def update_data():
     global speed
     global data_1, data_2, data_3, data_4, data_5, data_6
     global soc_lv_level, soc_hv_level
     global low_soc_lv_alert_shown, low_soc_hv_alert_shown
     global rotory, can_activity, can_blink_state, last_can_activity
+    global last_overflow_time
 
     current_time = time.time()
 
@@ -305,6 +438,23 @@ def update_data():
 
     if "RPM" in signal_values:
         rpm_value = signal_values["RPM"]
+        overflow_detected = False
+
+        # Handle negative RPM values (overflow protection)
+        if rpm_value != "ERR" and isinstance(rpm_value, (int, float)):
+            # Check for overflow (negative values appearing as large positive numbers)
+            if rpm_value > 32767:  # Likely a negative value wrapped around
+                overflow_detected = True
+                rpm_value = 0
+            elif rpm_value < 0:  # Direct negative value
+                overflow_detected = True
+                rpm_value = 0
+
+        # Show funny popup if overflow detected (but not more than once every 5 seconds)
+        if overflow_detected and (current_time - last_overflow_time > 5.0):
+            last_overflow_time = current_time
+            app.after(0, show_funny_rpm_popup)  # Schedule popup on main thread
+
         speed = round(
             rpm_value * 0.02454, 1
         )  # Convert RPM to km/h (1000 RPM = 24.54 km/h)
