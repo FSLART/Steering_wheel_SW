@@ -312,7 +312,7 @@ def update_data():
         # Update RPM shift lights (max RPM is 6500, min is 0)
         if rpm_value != "ERR" and isinstance(rpm_value, (int, float)):
             # Calculate how many lights should be on (0-12)
-            lights_on = int((rpm_value / 6500) * 12)
+            lights_on = int((rpm_value / 5000) * 12)
             lights_on = min(lights_on, 12)  # Cap at 12 lights
 
             # Update each shift light
