@@ -304,9 +304,12 @@ def update_data():
         can_indicator.configure(text_color="red")
 
     if "RPM" in signal_values:
-        speed = signal_values["RPM"]  # Convert RPM to Km
-        # Update RPM shift lights (max RPM is 6500, min is 0)
         rpm_value = signal_values["RPM"]
+        speed = round(
+            rpm_value * 0.02454, 1
+        )  # Convert RPM to km/h (1000 RPM = 24.54 km/h)
+
+        # Update RPM shift lights (max RPM is 6500, min is 0)
         if rpm_value != "ERR" and isinstance(rpm_value, (int, float)):
             # Calculate how many lights should be on (0-12)
             lights_on = int((rpm_value / 6500) * 12)
@@ -315,13 +318,15 @@ def update_data():
             # Update each shift light
             for i, light in enumerate(shift_lights):
                 if i < lights_on:
-                    # Determine color based on position
-                    if i < 4:  # First 4 lights - green
+                    # Determine color based on position (4 colors across 12 lights)
+                    if i < 3:  # First 3 lights - green
                         light.configure(text_color="green")
-                    elif i < 8:  # Next 4 lights - yellow
+                    elif i < 6:  # Next 3 lights - yellow
                         light.configure(text_color="yellow")
-                    else:  # Last 4 lights - red
+                    elif i < 9:  # Next 3 lights - red
                         light.configure(text_color="red")
+                    else:  # Last 3 lights - blue
+                        light.configure(text_color="blue")
                 else:
                     # Light is off
                     light.configure(text_color="gray30")
@@ -339,6 +344,9 @@ def update_data():
             R2D_label.configure(text="READY TO DRIVE", text_color="green")
         else:
             R2D_label.configure(text="NOT READY", text_color="red")
+    else:
+        # No R2D signal available
+        R2D_label.configure(text="R2D STATE UNKNOWN", text_color="purple")
     if "INV_Temperature" in signal_values:
         data_1 = signal_values["INV_Temperature"]  # Update Temp 1
     if "Motor_Temperature" in signal_values:
