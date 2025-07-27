@@ -49,20 +49,31 @@ class CANSignalReceiver:
                     # Extract 2 bytes in big-endian format
                     lv_voltage_raw = (msg.data[0] << 8) | msg.data[1]
 
-                    # Store the raw value in signal_values
-                    signal_values["LV_Voltage"] = lv_voltage_raw / 1000
-
-                    # Create message_signals entry for consistency
-                    message_signals[0x69] = {
-                        "name": "PDM_Data",
-                        "signals": {"LV_Voltage": lv_voltage_raw},
-                    }
-
-                    can_activity = True
+                    # Debug: print raw bytes
                     print(
-                        f"Received PDM_Data (0x69): LV_Voltage = {lv_voltage_raw} (raw)"
+                        f"0x69 raw bytes: {[hex(b) for b in msg.data[:2]]}, combined: {lv_voltage_raw}"
                     )
+
+                    # Only update if we get a reasonable value (avoid zeros unless intentional)
+                    if lv_voltage_raw > 0:  # Assuming voltage should never be exactly 0
+                        # Store the raw value in signal_values
+                        signal_values["LV_Voltage"] = lv_voltage_raw / 1000
+
+                        # Create message_signals entry for consistency
+                        message_signals[0x69] = {
+                            "name": "PDM_Data",
+                            "signals": {"LV_Voltage": lv_voltage_raw},
+                        }
+
+                        can_activity = True
+                        print(
+                            f"Received PDM_Data (0x69): LV_Voltage = {lv_voltage_raw} (raw), {lv_voltage_raw / 1000:.3f}V (scaled)"
+                        )
+                    else:
+                        print(f"0x69: Ignoring zero/invalid value: {lv_voltage_raw}")
                     return
+                else:
+                    print(f"0x69: Insufficient data length: {len(msg.data)} bytes")
 
             # Normal DBC decoding for other messages
             decoded_msg = db.get_message_by_frame_id(msg.arbitration_id)
