@@ -343,8 +343,8 @@ def update_data():
             # Turn off all lights when RPM is error
             for light in shift_lights:
                 light.configure(text_color="gray30")
-    if "LV_SOC" in signal_values:
-        soc_lv_level = signal_values["LV_SOC"]  # Update SoC LV level
+    # if "LV_SOC" in signal_values:
+    #    soc_lv_level = signal_values["LV_SOC"]  # Update SoC LV level
 
     # Handle LV voltage for voltage-based percentage calculation
     if "LV_Voltage" in signal_values:
