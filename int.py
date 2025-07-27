@@ -343,15 +343,15 @@ def update_data():
             # Turn off all lights when RPM is error
             for light in shift_lights:
                 light.configure(text_color="gray30")
-    # Handle LV SOC - prioritize direct SOC signal over voltage-based calculation
     if "LV_SOC" in signal_values:
-        soc_lv_level = signal_values["LV_SOC"]  # Update SoC LV level from direct signal
-    elif "LV_Voltage" in signal_values:
-        # Only use voltage-based calculation if no direct SOC signal is available
+        soc_lv_level = signal_values["LV_SOC"]  # Update SoC LV level
+
+    # Handle LV voltage for voltage-based percentage calculation
+    if "LV_Voltage" in signal_values:
         lv_voltage_raw = signal_values["LV_Voltage"]
 
         if lv_voltage_raw != "ERR" and isinstance(lv_voltage_raw, (int, float)):
-            # Voltage is already scaled in can_receiver.py (divided by 1000)
+            # Apply DBC scaling: multiply by 0.1 to get actual voltage
             lv_voltage = lv_voltage_raw
             # Calculate percentage based on voltage (24V system)
             min_voltage = 20.0  # Minimum voltage (0%) - adjusted for 24V system
@@ -397,31 +397,29 @@ def update_data():
     data_label_3.configure(text=str(data_3))  # Update Temp 3
     data_label_4.configure(text=str(data_4))  # Update Kw Inst.
     data_label_5.configure(text=str(data_5))  # Update Kw Limit
-    
-    # Update progress bars with proper scaling
-    if soc_hv_level != "ERR":
-        soc_HV_bar.set(soc_hv_level / 100)  # Update SoC HV progress bar (0-1 scale)
-    if soc_lv_level != "ERR":
-        soc_LV_bar.set(soc_lv_level / 100)  # Update SoC LV progress bar (0-1 scale)
+    soc_HV_bar.set(soc_hv_level)  # Update SoC LV progress bar
+    soc_LV_bar.set(soc_lv_level)  # Update SoC LV progress bar
 
     if soc_hv_level != "ERR":
         soc_HV_per.configure(
             text=str(int(soc_hv_level)) + "%"
         )  # Update SoC HV percentage
+        soc_HV_bar.set(soc_hv_level / 100)  # Update SoC HV progress bar (0-1 scale)
 
     if soc_lv_level != "ERR":
         # Check if we have voltage data to display
         if "LV_Voltage" in signal_values and signal_values["LV_Voltage"] != "ERR":
-            lv_voltage_display = signal_values["LV_Voltage"]
+            lv_voltage = signal_values["LV_Voltage"]
             # Display both voltage and percentage
             soc_LV_per.configure(
-                text=f"{lv_voltage_display:.1f}V\n{int(soc_lv_level)}%"
+                text=f"{lv_voltage:.1f}V\n{int(soc_lv_level)}%"
             )  # Show voltage and percentage
         else:
             # Fallback to just percentage if no voltage data
             soc_LV_per.configure(
                 text=str(int(soc_lv_level)) + "%"
             )  # Update SoC LV percentage
+        soc_LV_bar.set(soc_lv_level / 100)  # Update SoC LV progress bar (0-1 scale)
     # Check LV SoC
     if soc_lv_level < 0.2 and not low_soc_lv_alert_shown:
         # show_error_popup("SoC LV below 20%")
