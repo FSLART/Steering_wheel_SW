@@ -352,7 +352,7 @@ def update_data():
 
         if lv_voltage_raw != "ERR" and isinstance(lv_voltage_raw, (int, float)):
             # Apply DBC scaling: multiply by 0.1 to get actual voltage
-            lv_voltage = lv_voltage_raw * 0.1
+            lv_voltage = lv_voltage_raw
             # Calculate percentage based on voltage (24V system)
             min_voltage = 20.0  # Minimum voltage (0%) - adjusted for 24V system
             max_voltage = 28.8  # Maximum voltage (100%) - fully charged 24V
