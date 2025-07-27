@@ -1,6 +1,6 @@
 x = subrede do telemovel
 
-sudo ssh 192.168.x.164
+sudo ssh root@192.168.x.164
 ip a
 
 user root
