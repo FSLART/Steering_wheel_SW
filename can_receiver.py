@@ -43,6 +43,28 @@ class CANSignalReceiver:
     def handle_can_message(self, msg):
         global can_activity
         try:
+            # Hardcoded handling for 0x69 (PDM)
+            if msg.arbitration_id == 0x69:
+                if len(msg.data) >= 2:
+                    # Extract 2 bytes in big-endian format
+                    lv_voltage_raw = (msg.data[0] << 8) | msg.data[1]
+
+                    # Store the raw value in signal_values
+                    signal_values["LV_Voltage"] = lv_voltage_raw
+
+                    # Create message_signals entry for consistency
+                    message_signals[0x69] = {
+                        "name": "PDM_Data",
+                        "signals": {"LV_Voltage": lv_voltage_raw},
+                    }
+
+                    can_activity = True
+                    print(
+                        f"Received PDM_Data (0x69): LV_Voltage = {lv_voltage_raw} (raw)"
+                    )
+                    return
+
+            # Normal DBC decoding for other messages
             decoded_msg = db.get_message_by_frame_id(msg.arbitration_id)
             decoded_signals = decoded_msg.decode(msg.data)
 

@@ -3,6 +3,8 @@ x = subrede do telemovel
 sudo ssh root@192.168.x.164
 ip a
 
+sudo ssh root@bananapim2zero.local
+
 user root
 pass root
 
