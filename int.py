@@ -57,7 +57,7 @@ R2D_label.place(relx=0.5, rely=0.96, anchor="center")
 can_indicator = ctk.CTkLabel(
     app,
     text="●",
-    font=("Noto Sans Bold", 30, "bold"),
+    font=("Noto Sans Bold", 15, "bold"),
     text_color="red",
 )
 can_indicator.place(x=5, y=5)
@@ -85,7 +85,7 @@ data_7 = 4
 low_soc_lv_alert_shown = False
 low_soc_hv_alert_shown = False
 can_blink_state = False  # For blinking effect
-last_can_activity = 0  # Track last CAN activity timestamp
+last_can_activity = time.time()  # Initialize to current time to avoid immediate timeout
 
 # Rectangle 1 - DATA XXXXXX
 rect_1 = ctk.CTkFrame(
@@ -328,14 +328,14 @@ def update_data():
             for i, light in enumerate(shift_lights):
                 if i < lights_on:
                     # Determine color based on position (4 colors across 12 lights)
-                    if i < 3:  # First 3 lights - green
-                        light.configure(text_color="green")
-                    elif i < 6:  # Next 3 lights - yellow
-                        light.configure(text_color="yellow")
-                    elif i < 9:  # Next 3 lights - red
-                        light.configure(text_color="red")
-                    else:  # Last 3 lights - blue
-                        light.configure(text_color="blue")
+                    if i < 3:  # First 3 lights - bright green
+                        light.configure(text_color="#00FF00")  # Pure bright green
+                    elif i < 6:  # Next 3 lights - bright yellow
+                        light.configure(text_color="#FFFF00")  # Pure bright yellow
+                    elif i < 9:  # Next 3 lights - bright red
+                        light.configure(text_color="#FF0000")  # Pure bright red
+                    else:  # Last 3 lights - bright blue
+                        light.configure(text_color="#0000FF")  # Pure bright blue
                 else:
                     # Light is off
                     light.configure(text_color="gray30")
@@ -353,7 +353,6 @@ def update_data():
         if lv_voltage_raw != "ERR" and isinstance(lv_voltage_raw, (int, float)):
             # Apply DBC scaling: multiply by 0.1 to get actual voltage
             lv_voltage = lv_voltage_raw * 0.1
-
             # Calculate percentage based on voltage (24V system)
             min_voltage = 20.0  # Minimum voltage (0%) - adjusted for 24V system
             max_voltage = 28.8  # Maximum voltage (100%) - fully charged 24V
@@ -377,7 +376,7 @@ def update_data():
         if r2d_state == 1:
             R2D_label.configure(text="READY TO DRIVE", text_color="green")
         else:
-            R2D_label.configure(text="NOT READY", text_color="red")
+            R2D_label.configure(text="Jose GAY", text_color="red")
     else:
         # No R2D signal available
         R2D_label.configure(text="R2D STATE UNKNOWN", text_color="purple")
@@ -390,7 +389,7 @@ def update_data():
     if "TRGT_Power" in signal_values:
         data_4 = signal_values["TRGT_Power"]  # Update Kw Inst.
     if "LMT1" in signal_values:
-        data_5 = signal_values["LMT1"]  # Update Kw Limit
+        data_5 = signal_values["LMT1"]  # Update Kw Limzit
 
     speed_label.configure(text=str(speed))  # Update the speed display
     data_label_1.configure(text=str(data_1 / 10))  # Update Temp 1

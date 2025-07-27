@@ -15,7 +15,15 @@ bus = can.interface.Bus(can_interface, interface="socketcan")
 # Shared global data
 signal_values = {}  # signal_name -> value
 message_signals = {}  # frame_id -> {name, signals}
-watched_ids = [0x20, 0x21, 0x22, 0x23, 0x24, 0x60]
+watched_ids = [
+    0x20,
+    0x21,
+    0x22,
+    0x23,
+    0x24,
+    0x60,
+    0x69,
+]  # Added 0x69 (105) for PDM LV_Voltage
 can_activity = False  # Flag to indicate successful CAN reception
 
 
