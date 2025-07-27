@@ -50,7 +50,7 @@ class CANSignalReceiver:
                     lv_voltage_raw = (msg.data[0] << 8) | msg.data[1]
 
                     # Store the raw value in signal_values
-                    signal_values["LV_Voltage"] = lv_voltage_raw
+                    signal_values["LV_Voltage"] = lv_voltage_raw / 1000
 
                     # Create message_signals entry for consistency
                     message_signals[0x69] = {
