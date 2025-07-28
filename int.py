@@ -350,23 +350,33 @@ def update_data():
     if "LV_Voltage" in signal_values:
         lv_voltage_raw = signal_values["LV_Voltage"]
 
-        if lv_voltage_raw != "ERR" and isinstance(lv_voltage_raw, (int, float)):
-            # Apply DBC scaling: multiply by 0.1 to get actual voltage
+        if (
+            lv_voltage_raw != "ERR"
+            and isinstance(lv_voltage_raw, (int, float))
+            and lv_voltage_raw > 0
+        ):
+            # Voltage is already scaled in can_receiver.py (divided by 1000)
             lv_voltage = lv_voltage_raw
-            # Calculate percentage based on voltage (24V system)
-            min_voltage = 20.0  # Minimum voltage (0%) - adjusted for 24V system
-            max_voltage = 28.8  # Maximum voltage (100%) - fully charged 24V
 
-            # Calculate percentage based on voltage range
-            voltage_percentage = (
-                (lv_voltage - min_voltage) / (max_voltage - min_voltage)
-            ) * 100
-            voltage_percentage = max(
-                0, min(100, voltage_percentage)
-            )  # Clamp between 0-100%
+            # Sanity check: voltage should be in reasonable range (15V-35V for 24V system)
+            if 15.0 <= lv_voltage <= 35.0:
+                # Calculate percentage based on voltage (24V system)
+                min_voltage = 20.0  # Minimum voltage (0%) - adjusted for 24V system
+                max_voltage = 28.8  # Maximum voltage (100%) - fully charged 24V
 
-            # Update the LV bar with voltage-based percentage
-            soc_lv_level = voltage_percentage
+                # Calculate percentage based on voltage range
+                voltage_percentage = (
+                    (lv_voltage - min_voltage) / (max_voltage - min_voltage)
+                ) * 100
+                voltage_percentage = max(
+                    0, min(100, voltage_percentage)
+                )  # Clamp between 0-100%
+
+                # Update the LV bar with voltage-based percentage
+                soc_lv_level = voltage_percentage
+            else:
+                print(f"Warning: LV voltage out of range: {lv_voltage}V")
+                lv_voltage = "ERR"
         else:
             lv_voltage = "ERR"
     if "SOC_HV" in signal_values:
@@ -410,16 +420,25 @@ def update_data():
         # Check if we have voltage data to display
         if "LV_Voltage" in signal_values and signal_values["LV_Voltage"] != "ERR":
             lv_voltage = signal_values["LV_Voltage"]
-            # Display both voltage and percentage
-            soc_LV_per.configure(
-                text=f"{lv_voltage:.1f}V\n{int(soc_lv_level)}%"
-            )  # Show voltage and percentage
+            # Ensure voltage is valid before displaying
+            if isinstance(lv_voltage, (int, float)) and 15.0 <= lv_voltage <= 35.0:
+                # Display both voltage and percentage
+                soc_LV_per.configure(
+                    text=f"{lv_voltage:.1f}V\n{int(soc_lv_level)}%"
+                )  # Show voltage and percentage
+            else:
+                # Invalid voltage, show error
+                soc_LV_per.configure(text=f"ERR V\n{int(soc_lv_level)}%")
         else:
             # Fallback to just percentage if no voltage data
             soc_LV_per.configure(
                 text=str(int(soc_lv_level)) + "%"
             )  # Update SoC LV percentage
         soc_LV_bar.set(soc_lv_level / 100)  # Update SoC LV progress bar (0-1 scale)
+    else:
+        # Both voltage and percentage are error
+        soc_LV_per.configure(text="ERR")
+        soc_LV_bar.set(0)  # Set bar to 0 when error
     # Check LV SoC
     if soc_lv_level < 0.2 and not low_soc_lv_alert_shown:
         # show_error_popup("SoC LV below 20%")
@@ -622,8 +641,6 @@ def open_calibration_window():
     )
     time_label.place(x=20, y=8)
     update_time()
-
-    y_position = 80  # Initial y position for the first category
 
     header_frame = ctk.CTkFrame(
         calibration_window, width=800, height=60, fg_color="black"

@@ -22,8 +22,7 @@ watched_ids = [
     0x23,
     0x24,
     0x60,
-    0x69,
-]  # Added 0x69 (105) for PDM LV_Voltage
+]
 can_activity = False  # Flag to indicate successful CAN reception
 
 
@@ -54,10 +53,14 @@ class CANSignalReceiver:
                         f"0x69 raw bytes: {[hex(b) for b in msg.data[:2]]}, combined: {lv_voltage_raw}"
                     )
 
-                    # Only update if we get a reasonable value (avoid zeros unless intentional)
-                    if lv_voltage_raw > 0:  # Assuming voltage should never be exactly 0
-                        # Store the raw value in signal_values
-                        signal_values["LV_Voltage"] = lv_voltage_raw / 1000
+                    # Convert to voltage (assuming raw value represents millivolts or similar)
+                    # Only update if we get a reasonable raw value
+                    if (
+                        lv_voltage_raw > 15000
+                    ):  # Should be > 15V in raw units (15000 if millivolts)
+                        # Store the voltage value (divide by 1000 to convert from millivolts to volts)
+                        voltage_scaled = lv_voltage_raw / 1000
+                        signal_values["LV_Voltage"] = voltage_scaled
 
                         # Create message_signals entry for consistency
                         message_signals[0x69] = {
@@ -67,10 +70,12 @@ class CANSignalReceiver:
 
                         can_activity = True
                         print(
-                            f"Received PDM_Data (0x69): LV_Voltage = {lv_voltage_raw} (raw), {lv_voltage_raw / 1000:.3f}V (scaled)"
+                            f"Received PDM_Data (0x69): LV_Voltage = {lv_voltage_raw} (raw), {voltage_scaled:.3f}V (scaled)"
                         )
                     else:
-                        print(f"0x69: Ignoring zero/invalid value: {lv_voltage_raw}")
+                        print(
+                            f"0x69: Ignoring unreasonable value: {lv_voltage_raw} (too low for 24V system)"
+                        )
                 else:
                     print(f"0x69: Insufficient data length: {len(msg.data)} bytes")
 
