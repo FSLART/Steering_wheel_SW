@@ -43,7 +43,7 @@ class CANSignalReceiver:
     def handle_can_message(self, msg):
         global can_activity
         try:
-            # Hardcoded handling for 0x69 (PDM)
+            # Hardcoded handling for 0x69 (PDM) - skip DBC decoding for this ID
             if msg.arbitration_id == 0x69:
                 if len(msg.data) >= 2:
                     # Extract 2 bytes in big-endian format
@@ -71,9 +71,11 @@ class CANSignalReceiver:
                         )
                     else:
                         print(f"0x69: Ignoring zero/invalid value: {lv_voltage_raw}")
-                    return
                 else:
                     print(f"0x69: Insufficient data length: {len(msg.data)} bytes")
+
+                # Exit early - do not attempt DBC decoding for 0x69
+                return
 
             # Normal DBC decoding for other messages
             decoded_msg = db.get_message_by_frame_id(msg.arbitration_id)
