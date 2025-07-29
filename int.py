@@ -386,7 +386,7 @@ def update_data():
         if r2d_state == 1:
             R2D_label.configure(text="READY TO DRIVE", text_color="green")
         else:
-            R2D_label.configure(text="Alex GAY", text_color="red")
+            R2D_label.configure(text="NOT READY", text_color="red")
     else:
         # No R2D signal available
         R2D_label.configure(text="R2D STATE UNKNOWN", text_color="purple")
