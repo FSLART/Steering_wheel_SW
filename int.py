@@ -341,15 +341,15 @@ def update_data():
             # Update each shift light
             for i, light in enumerate(shift_lights):
                 if i < lights_on:
-                    # Determine color based on position (4 colors across 12 lights)
-                    if i < 3:  # First 3 lights - bright green
-                        light.configure(text_color="#00FF00")  # Pure bright green
-                    elif i < 6:  # Next 3 lights - bright yellow
-                        light.configure(text_color="#FFFF00")  # Pure bright yellow
-                    elif i < 9:  # Next 3 lights - bright red
-                        light.configure(text_color="#FF0000")  # Pure bright red
-                    else:  # Last 3 lights - bright blue
-                        light.configure(text_color="#0000FF")  # Pure bright blue
+                    # Determine color based on position (4 colors across 12 lights) - maximum saturation
+                    if i < 3:  # First 3 lights - maximum saturated green
+                        light.configure(text_color="#00FF00")  # Pure saturated green
+                    elif i < 6:  # Next 3 lights - maximum saturated yellow
+                        light.configure(text_color="#FFFF00")  # Pure saturated yellow
+                    elif i < 9:  # Next 3 lights - maximum saturated red
+                        light.configure(text_color="#FF0000")  # Pure saturated red
+                    else:  # Last 3 lights - maximum saturated cyan (more vibrant than blue)
+                        light.configure(text_color="#00FFFF")  # Pure saturated cyan
                 else:
                     # Light is off
                     light.configure(text_color="gray30")
@@ -403,19 +403,29 @@ def update_data():
     if "r2d_manual" in signal_values or "r2d_auto" in signal_values:
         # R2D is ready if either manual or auto R2D is active
         if r2d_manual == 1 or r2d_auto == 1:
-            R2D_label.configure(text="READY", text_color="green")
+            R2D_label.configure(
+                text="READY", text_color="#00FF00"
+            )  # Maximum saturated green
         else:
-            R2D_label.configure(text="NOT READY", text_color="red")
+            R2D_label.configure(
+                text="NOT READY", text_color="#FF0000"
+            )  # Maximum saturated red
     elif "R2D" in signal_values:
         # Fallback to legacy R2D signal if available
         r2d_state = signal_values["R2D"]
         if r2d_state == 1:
-            R2D_label.configure(text="READY", text_color="green")
+            R2D_label.configure(
+                text="READY", text_color="#00FF00"
+            )  # Maximum saturated green
         else:
-            R2D_label.configure(text="NOT READY", text_color="red")
+            R2D_label.configure(
+                text="NOT READY", text_color="#FF0000"
+            )  # Maximum saturated red
     else:
         # No R2D signal available
-        R2D_label.configure(text="R2D STATE UNKNOWN", text_color="purple")
+        R2D_label.configure(
+            text="R2D STATE UNKNOWN", text_color="#FF00D9"
+        )  # Maximum saturated magenta
     if "INV_Temperature" in signal_values:
         data_1 = signal_values["INV_Temperature"]  # Update Temp 1
     if "Motor_Temperature" in signal_values:
