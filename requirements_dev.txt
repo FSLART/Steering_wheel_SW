@@ -1,0 +1,7 @@
+# Development requirements for UI testing on PC
+# These are the minimal requirements to run the dashboard UI without hardware
+
+customtkinter>=5.0.0
+
+# Optional: for better development experience
+# tkinter is included with Python, so no need to install separately
