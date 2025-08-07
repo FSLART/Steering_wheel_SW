@@ -384,7 +384,7 @@ def update_data():
     if "R2D" in signal_values:
         r2d_state = signal_values["R2D"]
         if r2d_state == 1:
-            R2D_label.configure(text="READY TO DRIVE", text_color="green")
+            R2D_label.configure(text="Perdu GAY", text_color="green")
         else:
             R2D_label.configure(text="NOT READY", text_color="red")
     else:
