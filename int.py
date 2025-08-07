@@ -395,10 +395,22 @@ def update_data():
             lv_voltage = "ERR"
     if "SOC_HV" in signal_values:
         soc_hv_level = signal_values["SOC_HV"]  # Update SoC HV level
-    if "R2D" in signal_values:
+
+    # Check R2D state from both manual and auto signals (VCU_IGN_R2D message ID 1536)
+    r2d_manual = signal_values.get("r2d_manual", 0)
+    r2d_auto = signal_values.get("r2d_auto", 0)
+
+    if "r2d_manual" in signal_values or "r2d_auto" in signal_values:
+        # R2D is ready if either manual or auto R2D is active
+        if r2d_manual == 1 or r2d_auto == 1:
+            R2D_label.configure(text="READY", text_color="green")
+        else:
+            R2D_label.configure(text="NOT READY", text_color="red")
+    elif "R2D" in signal_values:
+        # Fallback to legacy R2D signal if available
         r2d_state = signal_values["R2D"]
         if r2d_state == 1:
-            R2D_label.configure(text="Perdu GAY", text_color="green")
+            R2D_label.configure(text="READY", text_color="green")
         else:
             R2D_label.configure(text="NOT READY", text_color="red")
     else:
