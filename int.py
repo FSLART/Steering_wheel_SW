@@ -12,6 +12,12 @@ from can_receiver import (
     can_activity,
 )
 from rotary import RotarySwitch
+from windows import (
+    create_debug_window,
+    create_calibration_window,
+    create_autonomous_window,
+    create_main_dashboard,
+)
 
 # rotary = RotarySwitch()
 # rotary.start()
@@ -184,6 +190,7 @@ speed_unit.place(relx=0.75, rely=0.60, anchor="center")
 
 debug_window = None
 calibration_window = None
+autonomous_window = None
 
 
 def monitor_gpio_buttons():
@@ -213,29 +220,36 @@ def monitor_gpio_buttons():
 
             # Rising edge detection for Next button
             if next_state and not prev_next:
-                window = (window + 1) % 3
+                window = (window + 1) % 4  # Changed to 4 windows
                 state_changed = True
             prev_next = next_state
 
             # Rising edge detection for Back button
             if back_state and not prev_back:
-                window = (window - 1) % 3
+                window = (window - 1) % 4  # Changed to 4 windows
                 state_changed = True
             prev_back = back_state
 
             if state_changed:
-                match window:
-                    case 0:
-                        app.after(0, close_calibration_window)
-                        app.after(0, close_debug_window)
-                        app.after(0, app.focus_force)
-                        app.after(0, app.lift)
-                    case 1:
-                        app.after(0, close_calibration_window)
-                        app.after(0, open_debug_window)
-                    case 2:
-                        app.after(0, close_debug_window)
-                        app.after(0, open_calibration_window)
+                # Close all windows first with error handling
+                try:
+                    app.after(0, close_calibration_window)
+                    app.after(0, close_debug_window)
+                    app.after(0, close_autonomous_window)
+                except Exception:
+                    pass
+
+                # Then open the requested window
+                if window == 0:
+                    # Main dashboard - all windows already closed
+                    app.after(0, app.focus_force)
+                    app.after(0, app.lift)
+                elif window == 1:
+                    app.after(50, open_autonomous_window)
+                elif window == 2:
+                    app.after(50, open_calibration_window)
+                elif window == 3:
+                    app.after(50, open_debug_window)
         except Exception as e:
             print(f"GPIO monitor error: {e}")
 
@@ -401,6 +415,25 @@ def update_data():
     if "LMT1" in signal_values:
         data_5 = signal_values["LMT1"]  # Update Kw Limzit
 
+    # Process autonomous mode data if available
+    # These signals should come from CAN when in autonomous mode
+    if "Jerson_State" in signal_values:
+        pass  # Autonomous window will handle display
+    if "ACU_State" in signal_values:
+        pass  # Autonomous window will handle display
+    if "VCU_State" in signal_values:
+        pass  # Autonomous window will handle display
+    if "Maxon_State" in signal_values:
+        pass  # Autonomous window will handle display
+    if "Hydraulic_Front" in signal_values:
+        pass  # Autonomous window will handle display
+    if "Hydraulic_Rear" in signal_values:
+        pass  # Autonomous window will handle display
+    if "Pneumatic_Front" in signal_values:
+        pass  # Autonomous window will handle display
+    if "Pneumatic_Rear" in signal_values:
+        pass  # Autonomous window will handle display
+
     speed_label.configure(text=str(speed))  # Update the speed display
     data_label_1.configure(text=str(data_1 / 10))  # Update Temp 1
     data_label_2.configure(text=str(data_2 / 10))  # Update Temp COLD
@@ -492,98 +525,13 @@ update_data()
 
 
 def open_debug_window():
-    debug_window = ctk.CTkToplevel(app)
-    debug_window.geometry("800x480")
-    debug_window.title("CAN Monitor")
-    debug_window.configure(cursor="none")
-    debug_window.attributes("-fullscreen", True)
-    ctk.set_appearance_mode("dark")
-    ctk.set_default_color_theme("blue")
-
-    # ==== Top Bar ====
-    top_bar = ctk.CTkFrame(debug_window, height=60)
-    top_bar.pack(side="top", fill="x")
-
-    # Horizontal line below top bar
-    line = ctk.CTkFrame(debug_window, height=3, fg_color="black")
-    line.pack(fill="x")
-
-    # Title centered in top bar
-    title_label = ctk.CTkLabel(
-        top_bar, text="CAN Monitor", font=("Noto Sans Bold", 28, "bold")
-    )
-    title_label.place(relx=0.5, rely=0.5, anchor="center")
-
-    # Time aligned to the left in top bar
-    time_label = ctk.CTkLabel(
-        top_bar, text="--:--", font=("Noto Sans Bold", 24, "bold")
-    )
-    time_label.place(x=20, rely=0.5, anchor="w")
-
-    def update_time():
-        current_time = time.strftime("%H:%M")
-        time_label.configure(text=current_time)
-        debug_window.after(1000, update_time)
-
-    update_time()
-
-    # ==== Content Area ====
-    content_frame = ctk.CTkFrame(debug_window)
-    content_frame.pack(fill="both", expand=True)
-
-    content_frame.grid_columnconfigure((0, 1), weight=1)
-    content_frame.grid_rowconfigure((0, 1, 2), weight=1)
-
-    signal_labels = {}
-
-    for idx, can_id in enumerate(watched_ids):
-        row = idx // 2
-        col = idx % 2
-
-        frame = ctk.CTkFrame(content_frame, corner_radius=5)
-        frame.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
-
-        inner_frame = ctk.CTkFrame(frame)
-        inner_frame.pack(fill="both", expand=True, padx=5, pady=5)
-
-        inner_frame.grid_columnconfigure(0, weight=7)
-        inner_frame.grid_columnconfigure(1, weight=3)
-
-        signal_label = ctk.CTkLabel(
-            inner_frame,
-            text="Waiting for data...",
-            justify="left",
-            anchor="nw",
-            font=ctk.CTkFont(size=18, weight="bold"),
-        )
-        signal_label.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
-
-        id_label = ctk.CTkLabel(
-            inner_frame,
-            text=f"0x{can_id:X}",
-            font=ctk.CTkFont(size=18, weight="bold"),
-            anchor="center",
-        )
-        id_label.grid(row=0, column=1, sticky="nsew")
-
-        signal_labels[can_id] = signal_label
-
-    def update_signal_display():
-        for can_id in watched_ids:
-            label = signal_labels[can_id]
-
-            if can_id in message_signals:
-                sig_dict = message_signals[can_id]["signals"]
-                lines = [f"{k}: {v}" for k, v in sig_dict.items()]
-                label.configure(text="\n".join(lines))
-                print(f"Updating {hex(can_id)} with: {lines}")
-            else:
-                label.configure(text="No data yet.")
-                print(f"ID {hex(can_id)} has no data yet.")
-
-        debug_window.after(100, update_signal_display)
-
-    update_signal_display()
+    global debug_window
+    try:
+        if debug_window is None or not debug_window.winfo_exists():
+            debug_window = create_debug_window(app, signal_values, watched_ids)
+    except Exception as e:
+        print(f"Error opening debug window: {e}")
+        debug_window = None
 
 
 def close_debug_window():
@@ -594,74 +542,13 @@ def close_debug_window():
 
 
 def open_calibration_window():
-    global calibration_label
-    calibration_window = ctk.CTkToplevel(app)
-    calibration_window.geometry("800x480")
-    calibration_window.attributes("-fullscreen", True)  # Set to fullscreen mode
-    calibration_window.title("CALIBRATION")
-    calibration_window.configure(cursor="none")
-    # Removed the line setting the entire window background to black
-
-    # Create the header frame
-    header_frame = ctk.CTkFrame(
-        calibration_window, width=800, height=60, fg_color="black"
-    )
-    header_frame.place(x=0, y=0)
-
-    # Create the title label
-    title_label = ctk.CTkLabel(
-        calibration_window,
-        text="CALIBRATION",
-        font=("Noto Sans Bold", 32, "bold"),
-        bg_color="black",
-    )
-    title_label.place(relx=0.5, y=23, anchor="center")
-
-    # Function to flash the title label
-    def flash_title():
-        current_color = title_label.cget("text_color")
-        new_color = "yellow" if current_color == "red" else "red"
-        title_label.configure(text_color=new_color)
-        calibration_window.after(300, flash_title)  # Flash every 300 ms
-
-    flash_title()
-
-    # Display the current time on the far left of the header
-    def update_time():
-        current_time = time.strftime("%H:%M")
-        time_label.configure(text=current_time)
-        calibration_window.after(1000, update_time)  # Update the time every second
-
-    time_label = ctk.CTkLabel(
-        calibration_window,
-        text="",
-        font=("Noto Sans Bold", 27, "bold"),
-        text_color="white",
-        bg_color="black",
-    )
-    time_label.place(x=20, y=8)
-    update_time()
-
-    header_frame = ctk.CTkFrame(
-        calibration_window, width=800, height=60, fg_color="black"
-    )
-    header_frame.place(x=0, y=0)
-
-    title_label = ctk.CTkLabel(
-        calibration_window,
-        text="CALIBRATION",
-        font=("Noto Sans Bold", 32, "bold"),
-        bg_color="black",
-    )
-    title_label.place(relx=0.5, y=23, anchor="center")
-
-    calibration_label = ctk.CTkLabel(
-        calibration_window,
-        text="LEVEL: N/A",
-        font=("Noto Sans Bold", 28),
-        text_color="white",
-    )
-    calibration_label.place(relx=0.5, rely=0.5, anchor="center")
+    global calibration_window
+    try:
+        if calibration_window is None or not calibration_window.winfo_exists():
+            calibration_window = create_calibration_window(app)
+    except Exception as e:
+        print(f"Error opening calibration window: {e}")
+        calibration_window = None
 
 
 def close_calibration_window():
@@ -669,6 +556,27 @@ def close_calibration_window():
     if calibration_window is not None and calibration_window.winfo_exists():
         calibration_window.destroy()
         calibration_window = None
+
+
+def open_autonomous_window():
+    global autonomous_window
+    try:
+        if autonomous_window is None or not autonomous_window.winfo_exists():
+            autonomous_window = create_autonomous_window(app, signal_values)
+    except Exception as e:
+        print(f"Error opening autonomous window: {e}")
+        autonomous_window = None
+
+
+def close_autonomous_window():
+    global autonomous_window
+    if autonomous_window is not None:
+        try:
+            if autonomous_window.winfo_exists():
+                autonomous_window.destroy()
+        except Exception:
+            pass
+        autonomous_window = None
 
 
 def check_heartbeats():
