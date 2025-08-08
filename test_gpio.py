@@ -26,10 +26,10 @@ def test_gpio_buttons():
 
     # Initialize GPIOs
     try:
-        gpio_next = GPIO(23, "in")
-        gpio_back = GPIO(24, "in")
-        gpio_ok = GPIO(25, "in")
-        gpio_cancel = GPIO(7, "in")
+        gpio_next = GPIO(13, "in")
+        gpio_back = GPIO(14, "in")
+        gpio_ok = GPIO(11, "in")
+        gpio_cancel = GPIO(12, "in")
 
         # Configure edge detection
         gpio_next.edge = "rising"
