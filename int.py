@@ -463,7 +463,7 @@ def update_data():
     data_label_4.configure(text=str(data_4))  # Update Kw Inst.
     data_label_5.configure(text=str(data_5))  # Update Kw Limit
     soc_HV_bar.set(soc_hv_level)  # Update SoC LV progress bar
-    soc_LV_bar.set(soc_lv_level)  # Update SoC LV progress bar
+    soc_LV_bar.set(soc_lv_level)  # Update SoC LV progress bar 
 
     if soc_hv_level != "ERR":
         soc_HV_per.configure(
