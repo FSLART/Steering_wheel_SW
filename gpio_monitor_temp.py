@@ -1,56 +1,31 @@
 #!/usr/bin/env python3
-"""
-GPIO Status Monitor
-Shows ON/OFF status for GPIOs 11, 12, 13, 14
-"""
-
 import time
 from periphery import GPIO
 
+# Initialize GPIOs
+gpio11 = GPIO(11, "in")
+gpio12 = GPIO(12, "in")
+gpio13 = GPIO(13, "in")
+gpio14 = GPIO(14, "in")
 
-def monitor_gpio_status():
-    try:
-        # Initialize GPIOs
-        gpios = {
-            "OK": GPIO(11, "in"),
-            "Cancel": GPIO(12, "in"),
-            "Back": GPIO(13, "in"),
-            "Next": GPIO(14, "in"),
-        }
+try:
+    while True:
+        # Read states and print (ON for pressed, OFF for not pressed)
+        print(
+            f"\rGPIO11: {'ON ' if gpio11.read() else 'OFF'} | "
+            f"GPIO12: {'ON ' if gpio12.read() else 'OFF'} | "
+            f"GPIO13: {'ON ' if gpio13.read() else 'OFF'} | "
+            f"GPIO14: {'ON ' if gpio14.read() else 'OFF'}",
+            end="",
+        )
+        time.sleep(0.1)
 
-        print("GPIO Status Monitor")
-        print("Press CTRL+C to exit")
-        print("-" * 40)
+except KeyboardInterrupt:
+    print("\nProgram stopped")
 
-        while True:
-            # Move cursor to start of screen (works in most terminals)
-            print("\033[H", end="")
-
-            # Print status for each GPIO
-            for name, gpio in gpios.items():
-                status = "ON " if gpio.read() else "OFF"
-                print(f"{name:6}: [{status}]")
-
-            # Add some spacing
-            print("\n" + "-" * 40)
-
-            # Small delay to prevent CPU overload
-            time.sleep(0.1)
-
-    except KeyboardInterrupt:
-        print("\nMonitor stopped by user")
-    except Exception as e:
-        print(f"\nError: {e}")
-        print("Make sure you're running with proper permissions (sudo)")
-    finally:
-        # Clean up GPIOs
-        for gpio in gpios.values():
-            try:
-                gpio.close()
-            except Exception:
-                pass
-        print("GPIOs cleaned up")
-
-
-if __name__ == "__main__":
-    monitor_gpio_status()
+finally:
+    # Clean up
+    gpio11.close()
+    gpio12.close()
+    gpio13.close()
+    gpio14.close()
