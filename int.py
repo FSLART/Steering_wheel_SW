@@ -1,7 +1,6 @@
 import customtkinter as ctk
 import time
 import threading
-from PIL import Image, ImageTk
 from periphery import GPIO
 from state_tracker import error_flags, heartbeat_timestamps, module_last_state
 from can_receiver import (
@@ -30,68 +29,12 @@ ctk.set_default_color_theme(
 
 CANSignalReceiver()
 
-def create_splash_screen():
-    """Create and display a splash screen for 2 seconds"""
-    splash = ctk.CTkToplevel()
-    splash.geometry("800x480")
-    splash.title("Loading...")
-    splash.attributes("-fullscreen", True)
-    splash.configure(cursor="none")
-    
-    # Try to load the splash image
-    try:
-        # Load and resize the image to fit the screen
-        splash_image_path = "/home/pedroferreira/Git/Steering_wheel_SW/funny_images/splash.bmp"
-        pil_image = Image.open(splash_image_path)
-        
-        image = ctk.CTkImage(
-            light_image=pil_image,
-            dark_image=pil_image,
-            size=(800, 480)
-        )
-        
-        # Create label with the image
-        image_label = ctk.CTkLabel(splash, image=image, text="")
-        image_label.pack(fill="both", expand=True)
-        
-    except Exception as e:
-        # Fallback if image loading fails
-        print(f"Could not load splash image: {e}")
-        fallback_label = ctk.CTkLabel(
-            splash, 
-            text="DASHBOARD\nLOADING...", 
-            font=("Noto Sans Bold", 60, "bold"),
-            text_color="white"
-        )
-        fallback_label.pack(expand=True)
-    
-    # Center the splash screen
-    splash.transient()
-    splash.grab_set()
-    splash.focus_force()
-    
-    # Close splash screen after 2 seconds and show main app
-    def close_splash():
-        splash.destroy()
-        app.deiconify()  # Show the main window
-        app.focus_force()
-    
-    splash.after(2000, close_splash)  # 2000ms = 2 seconds
-    
-    return splash
-
 # Start Main Window and Window Attributes
 app = ctk.CTk()
 app.geometry("800x480")
 app.title("Dashboard")
 app.attributes("-fullscreen", True)  # Set to fullscreen mode
 app.configure(cursor="none")
-
-# Hide the main window initially
-app.withdraw()
-
-# Show splash screen first
-splash_screen = create_splash_screen()
 
 # RPM Shift Lights - 12 circles
 shift_lights = []
@@ -520,7 +463,7 @@ def update_data():
     data_label_4.configure(text=str(data_4))  # Update Kw Inst.
     data_label_5.configure(text=str(data_5))  # Update Kw Limit
     soc_HV_bar.set(soc_hv_level)  # Update SoC LV progress bar
-    soc_LV_bar.set(soc_lv_level)  # Update SoC LV progress bar 
+    soc_LV_bar.set(soc_lv_level)  # Update SoC LV progress bar
 
     if soc_hv_level != "ERR":
         soc_HV_per.configure(
